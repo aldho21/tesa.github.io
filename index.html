@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth Widget – Google Sites</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --danger:#ef4444; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:var(--bg); color:var(--text); }
+    .wrap { min-height:100svh; display:grid; place-items:center; padding:24px; }
+    .card { width:100%; max-width:440px; background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:24px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    h1 { margin:0 0 4px; font-size:22px; }
+    p.muted { margin:0 0 16px; color:var(--muted); font-size:14px; }
+    .tabs { display:flex; gap:8px; margin-bottom:16px; }
+    .tab { flex:1; text-align:center; padding:10px 12px; border:1px solid #1f2937; border-radius:10px; cursor:pointer; background:#0b1220; color:#cbd5e1; user-select:none; }
+    .tab[aria-selected="true"] { background:#111827; color:#e5e7eb; border-color:#334155; outline:2px solid #334155; }
+    form { display:grid; gap:12px; }
+    label { font-size:13px; color:#cbd5e1; }
+    input { width:100%; padding:12px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:#e5e7eb; }
+    button { padding:12px 14px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:#e5e7eb; cursor:pointer; }
+    .primary { background:linear-gradient(180deg, #16a34a, #15803d); border-color:#14532d; font-weight:600; }
+    .link { background:transparent; border:none; color:#93c5fd; padding:0; font:inherit; cursor:pointer; }
+    .row { display:flex; gap:10px; align-items:center; }
+    .row > * { flex:1; }
+    .hint { font-size:12px; color:#9ca3af; }
+    .msg { margin-top:6px; font-size:13px; }
+    .msg.ok { color:#86efac; }
+    .msg.err { color:#fca5a5; }
+    .hidden { display:none !important; }
+    .userbox { display:grid; gap:10px; background:#0b1220; border:1px dashed #334155; padding:12px; border-radius:12px; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #334155; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Welcome</h1>
+      <p class="muted">Login • Signup • Forgot Password (Firebase Auth)</p>
+
+      <div class="tabs" role="tablist">
+        <button id="tab-login" class="tab" role="tab" aria-controls="panel-login" aria-selected="true">Login</button>
+        <button id="tab-signup" class="tab" role="tab" aria-controls="panel-signup" aria-selected="false">Signup</button>
+        <button id="tab-forgot" class="tab" role="tab" aria-controls="panel-forgot" aria-selected="false">Forgot</button>
+      </div>
+
+      <!-- LOGIN -->
+      <section id="panel-login" role="tabpanel">
+        <form id="form-login">
+          <div>
+            <label>Email</label>
+            <input id="login-email" type="email" autocomplete="email" required />
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="login-pass" type="password" autocomplete="current-password" required />
+          </div>
+          <button class="primary" type="submit">Login</button>
+          <div class="row">
+            <button class="link" type="button" data-goto="signup">Create account</button>
+            <button class="link" type="button" data-goto="forgot">Forgot password?</button>
+          </div>
+          <div id="login-msg" class="msg"></div>
+        </form>
+      </section>
+
+      <!-- SIGNUP -->
+      <section id="panel-signup" role="tabpanel" class="hidden">
+        <form id="form-signup">
+          <div>
+            <label>Display name (optional)</label>
+            <input id="signup-name" type="text" autocomplete="name" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="signup-email" type="email" autocomplete="email" required />
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="signup-pass" type="password" autocomplete="new-password" minlength="6" required />
+            <div class="hint">Min 6 characters (Firebase default)</div>
+          </div>
+          <button class="primary" type="submit">Create account</button>
+          <div id="signup-msg" class="msg"></div>
+        </form>
+      </section>
+
+      <!-- FORGOT -->
+      <section id="panel-forgot" role="tabpanel" class="hidden">
+        <form id="form-forgot">
+          <div>
+            <label>Email</label>
+            <input id="forgot-email" type="email" required />
+          </div>
+          <button class="primary" type="submit">Send reset link</button>
+          <div id="forgot-msg" class="msg"></div>
+        </form>
+      </section>
+
+      <!-- AUTHED USER -->
+      <section id="panel-user" class="hidden">
+        <div class="userbox">
+          <div><strong id="user-name">—</strong> <span id="user-email" class="badge"></span></div>
+          <div id="verify-wrap" class="hint hidden">Your email is not verified.
+            <button id="btn-send-verify" class="link" type="button">Resend verification</button>
+            <span id="verify-msg" class="msg"></span>
+          </div>
+          <div class="row">
+            <button id="btn-copy-token" type="button">Copy ID Token</button>
+            <button id="btn-signout" type="button">Sign out</button>
+          </div>
+          <div class="hint">Tip: Paste this widget link into Google Sites via <em>Embed &rarr; URL</em>.</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Firebase SDK v11 (modular) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
+    import {
+      getAuth,
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail,
+      sendEmailVerification,
+      signOut,
+      updateProfile
+    } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+
+    // 1) Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCkOcCs8BHsPwJEWNygvZnv2Bl7qgUJL0o",
+      authDomain: "tesa-5fb47.firebaseapp.com",
+      projectId: "tesa-5fb47",
+      appId: "1:642215116717:web:12a893e111beb78db42b24",
+    };
+
+    // 2) Init
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    setPersistence(auth, browserLocalPersistence);
+
+    // UI helpers
+    const $ = (q) => document.querySelector(q);
+    const show = (id) => $(id).classList.remove('hidden');
+    const hide = (id) => $(id).classList.add('hidden');
+    const setMsg = (el, text, ok=false) => { el.textContent = text; el.className = 'msg ' + (ok? 'ok':'err'); };
+
+    // Tabs
+    const tabs = [
+      { tab:'#tab-login', panel:'#panel-login' },
+      { tab:'#tab-signup', panel:'#panel-signup' },
+      { tab:'#tab-forgot', panel:'#panel-forgot' },
+    ];
+    function switchTo(key){
+      tabs.forEach(({tab,panel})=>{
+        const active = tab.includes(key);
+        $(tab).setAttribute('aria-selected', active ? 'true' : 'false');
+        $(panel).classList.toggle('hidden', !active);
+      });
+      hide('#panel-user');
+    }
+    tabs.forEach(({tab})=> $(tab).addEventListener('click', ()=> switchTo(tab.split('-')[1])));
+    document.querySelectorAll('[data-goto]').forEach(btn=> btn.addEventListener('click', ()=> switchTo(btn.dataset.goto)));
+
+    // Auth state
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Update UI
+        $('#user-name').textContent = user.displayName || 'Logged in';
+        $('#user-email').textContent = user.email || '';
+        $('#verify-wrap').classList.toggle('hidden', !!user.emailVerified === true);
+        hide('#panel-login'); hide('#panel-signup'); hide('#panel-forgot');
+        show('#panel-user');
+
+        // Send token to parent (Google Sites) if embedded
+        try {
+          const token = await user.getIdToken();
+          window.parent.postMessage({ type:'FIREBASE_ID_TOKEN', token }, '*');
+        } catch(_) {}
+      } else {
+        show('#panel-login'); hide('#panel-user');
+        switchTo('login');
+      }
+    });
+
+    // Handlers: Login
+    $('#form-login').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = $('#login-email').value.trim();
+      const pass  = $('#login-pass').value;
+      const msg = $('#login-msg'); msg.textContent='';
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        setMsg(msg, 'Login successful', true);
+      } catch (err) {
+        setMsg(msg, tidyError(err));
+      }
+    });
+
+    // Handlers: Signup
+    $('#form-signup').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name  = $('#signup-name').value.trim();
+      const email = $('#signup-email').value.trim();
+      const pass  = $('#signup-pass').value;
+      const msg = $('#signup-msg'); msg.textContent='';
+      try {
+        const { user } = await createUserWithEmailAndPassword(auth, email, pass);
+        if (name) await updateProfile(user, { displayName: name });
+        await sendEmailVerification(user);
+        setMsg(msg, 'Account created. Verification email sent.', true);
+      } catch (err) {
+        setMsg(msg, tidyError(err));
+      }
+    });
+
+    // Handlers: Forgot
+    $('#form-forgot').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = $('#forgot-email').value.trim();
+      const msg = $('#forgot-msg'); msg.textContent='';
+      try {
+        await sendPasswordResetEmail(auth, email);
+        setMsg(msg, 'Reset link sent to your email.', true);
+      } catch (err) {
+        setMsg(msg, tidyError(err));
+      }
+    });
+
+    // Resend verify
+    $('#btn-send-verify').addEventListener('click', async ()=>{
+      const span = $('#verify-msg'); span.textContent='';
+      try {
+        if (auth.currentUser) {
+          await sendEmailVerification(auth.currentUser);
+          setMsg(span, 'Verification email sent.', true);
+        }
+      } catch (err) { setMsg(span, tidyError(err)); }
+    });
+
+    // Copy token
+    $('#btn-copy-token').addEventListener('click', async ()=>{
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        await navigator.clipboard.writeText(token || '');
+        alert('ID token copied to clipboard');
+      } catch(_) { alert('Failed to copy'); }
+    });
+
+    // Sign out
+    $('#btn-signout').addEventListener('click', ()=> signOut(auth));
+
+    // Error helper
+    function tidyError(err){
+      const code = err?.code || '';
+      switch(code){
+        case 'auth/invalid-email': return 'Email tidak valid';
+        case 'auth/missing-password': return 'Password wajib diisi';
+        case 'auth/weak-password': return 'Password terlalu lemah (min 6 karakter)';
+        case 'auth/email-already-in-use': return 'Email sudah terdaftar';
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password': return 'Email atau password salah';
+        case 'auth/user-not-found': return 'Akun tidak ditemukan';
+        default: return (err?.message || 'Terjadi kesalahan');
+      }
+    }
+  </script>
+</body>
+</html>

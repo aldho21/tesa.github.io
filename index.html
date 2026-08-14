@@ -1,275 +1,648 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auth Widget – Google Sites</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aldho Helsaputra — IT Infrastructure & Automation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --danger:#ef4444; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:var(--bg); color:var(--text); }
-    .wrap { min-height:100svh; display:grid; place-items:center; padding:24px; }
-    .card { width:100%; max-width:440px; background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:24px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-    h1 { margin:0 0 4px; font-size:22px; }
-    p.muted { margin:0 0 16px; color:var(--muted); font-size:14px; }
-    .tabs { display:flex; gap:8px; margin-bottom:16px; }
-    .tab { flex:1; text-align:center; padding:10px 12px; border:1px solid #1f2937; border-radius:10px; cursor:pointer; background:#0b1220; color:#cbd5e1; user-select:none; }
-    .tab[aria-selected="true"] { background:#111827; color:#e5e7eb; border-color:#334155; outline:2px solid #334155; }
-    form { display:grid; gap:12px; }
-    label { font-size:13px; color:#cbd5e1; }
-    input { width:100%; padding:12px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:#e5e7eb; }
-    button { padding:12px 14px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:#e5e7eb; cursor:pointer; }
-    .primary { background:linear-gradient(180deg, #16a34a, #15803d); border-color:#14532d; font-weight:600; }
-    .link { background:transparent; border:none; color:#93c5fd; padding:0; font:inherit; cursor:pointer; }
-    .row { display:flex; gap:10px; align-items:center; }
-    .row > * { flex:1; }
-    .hint { font-size:12px; color:#9ca3af; }
-    .msg { margin-top:6px; font-size:13px; }
-    .msg.ok { color:#86efac; }
-    .msg.err { color:#fca5a5; }
-    .hidden { display:none !important; }
-    .userbox { display:grid; gap:10px; background:#0b1220; border:1px dashed #334155; padding:12px; border-radius:12px; }
-    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #334155; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --bg2:       #13161e;
+      --bg3:       #1a1e28;
+      --border:    #232736;
+      --text:      #e2e8f0;
+      --muted:     #6b7280;
+      --accent:    #6366f1;
+      --accent2:   #818cf8;
+      --teal:      #2dd4bf;
+      --glow:      rgba(99,102,241,0.15);
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { color: var(--teal); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 2rem;
+      height: 60px;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent2);
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 6rem 2rem 4rem;
+      max-width: 900px; margin: 0 auto;
+      position: relative;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--teal);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero-name {
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+    .hero-name span {
+      background: linear-gradient(135deg, var(--accent2), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-title {
+      font-size: 1.1rem;
+      color: var(--muted);
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+    .hero-desc {
+      max-width: 560px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent2); color: #fff; transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); transform: translateY(-1px); }
+
+    /* GLOW BG */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20%; left: -10%;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* SECTION */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--teal);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 3rem;
+    }
+
+    /* SKILLS */
+    #skills { background: var(--bg2); }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .skill-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .skill-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      background: rgba(99,102,241,0.1);
+      color: var(--accent2);
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .tag.teal {
+      background: rgba(45,212,191,0.08);
+      color: var(--teal);
+      border-color: rgba(45,212,191,0.2);
+    }
+
+    /* PROJECTS */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 1.2rem;
+    }
+    .project-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.6rem;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--teal));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .project-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .project-card:hover::before { opacity: 1; }
+    .project-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 0.8rem;
+    }
+    .project-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .project-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(45,212,191,0.1);
+      color: var(--teal);
+      border: 1px solid rgba(45,212,191,0.2);
+      white-space: nowrap;
+    }
+    .project-desc {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    .project-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stack-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--bg3);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* EXPERIENCE */
+    #experience { background: var(--bg2); }
+    .exp-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.8rem;
+      background: var(--bg3);
+      position: relative;
+    }
+    .exp-card + .exp-card { margin-top: 1rem; }
+    .exp-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+    .exp-role { font-size: 1rem; font-weight: 600; }
+    .exp-period {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .exp-company {
+      font-size: 0.875rem;
+      color: var(--accent2);
+      margin-bottom: 1rem;
+    }
+    .exp-bullets { list-style: none; }
+    .exp-bullets li {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      padding: 0.3rem 0;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .exp-bullets li::before {
+      content: '▹';
+      position: absolute; left: 0;
+      color: var(--teal);
+    }
+
+    /* CONTACT */
+    .contact-grid {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .contact-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.8rem 1.4rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+      transform: translateY(-2px);
+    }
+    .contact-icon { font-size: 1rem; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      .projects-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Welcome</h1>
-      <p class="muted">Login • Signup • Forgot Password (Firebase Auth)</p>
 
-      <div class="tabs" role="tablist">
-        <button id="tab-login" class="tab" role="tab" aria-controls="panel-login" aria-selected="true">Login</button>
-        <button id="tab-signup" class="tab" role="tab" aria-controls="panel-signup" aria-selected="false">Signup</button>
-        <button id="tab-forgot" class="tab" role="tab" aria-controls="panel-forgot" aria-selected="false">Forgot</button>
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">aldho21 ~</span>
+    <div class="nav-links">
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">// IT Infrastructure & Automation Engineer</div>
+      <h1 class="hero-name">Aldho<br /><span>Helsaputra</span></h1>
+      <p class="hero-title">IT Support Specialist · Homelab Enthusiast · Builder</p>
+      <p class="hero-desc">
+        4+ years building and maintaining IT infrastructure at a media technology company in Jakarta.
+        I go beyond ticket-closing — from self-hosted monitoring stacks and network automation
+        to AI pipelines and browser extensions. I build tools that actually solve problems.
+      </p>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="#contact" class="btn btn-ghost">Get in Touch</a>
       </div>
-
-      <!-- LOGIN -->
-      <section id="panel-login" role="tabpanel">
-        <form id="form-login">
-          <div>
-            <label>Email</label>
-            <input id="login-email" type="email" autocomplete="email" required />
-          </div>
-          <div>
-            <label>Password</label>
-            <input id="login-pass" type="password" autocomplete="current-password" required />
-          </div>
-          <button class="primary" type="submit">Login</button>
-          <div class="row">
-            <button class="link" type="button" data-goto="signup">Create account</button>
-            <button class="link" type="button" data-goto="forgot">Forgot password?</button>
-          </div>
-          <div id="login-msg" class="msg"></div>
-        </form>
-      </section>
-
-      <!-- SIGNUP -->
-      <section id="panel-signup" role="tabpanel" class="hidden">
-        <form id="form-signup">
-          <div>
-            <label>Display name (optional)</label>
-            <input id="signup-name" type="text" autocomplete="name" />
-          </div>
-          <div>
-            <label>Email</label>
-            <input id="signup-email" type="email" autocomplete="email" required />
-          </div>
-          <div>
-            <label>Password</label>
-            <input id="signup-pass" type="password" autocomplete="new-password" minlength="6" required />
-            <div class="hint">Min 6 characters (Firebase default)</div>
-          </div>
-          <button class="primary" type="submit">Create account</button>
-          <div id="signup-msg" class="msg"></div>
-        </form>
-      </section>
-
-      <!-- FORGOT -->
-      <section id="panel-forgot" role="tabpanel" class="hidden">
-        <form id="form-forgot">
-          <div>
-            <label>Email</label>
-            <input id="forgot-email" type="email" required />
-          </div>
-          <button class="primary" type="submit">Send reset link</button>
-          <div id="forgot-msg" class="msg"></div>
-        </form>
-      </section>
-
-      <!-- AUTHED USER -->
-      <section id="panel-user" class="hidden">
-        <div class="userbox">
-          <div><strong id="user-name">—</strong> <span id="user-email" class="badge"></span></div>
-          <div id="verify-wrap" class="hint hidden">Your email is not verified.
-            <button id="btn-send-verify" class="link" type="button">Resend verification</button>
-            <span id="verify-msg" class="msg"></span>
-          </div>
-          <div class="row">
-            <button id="btn-copy-token" type="button">Copy ID Token</button>
-            <button id="btn-signout" type="button">Sign out</button>
-          </div>
-          <div class="hint">Tip: Paste this widget link into Google Sites via <em>Embed &rarr; URL</em>.</div>
-        </div>
-      </section>
-
     </div>
   </div>
 
-  <!-- Firebase SDK v11 (modular) -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
-    import {
-      getAuth,
-      onAuthStateChanged,
-      setPersistence,
-      browserLocalPersistence,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail,
-      sendEmailVerification,
-      signOut,
-      updateProfile
-    } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="container">
+      <div class="section-label">// capabilities</div>
+      <h2 class="section-title">Technical Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-card-title">Infrastructure</div>
+          <div class="skill-tags">
+            <span class="tag">Proxmox</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Windows Server</span>
+            <span class="tag">Active Directory</span>
+            <span class="tag">WireGuard VPN</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Monitoring</div>
+          <div class="skill-tags">
+            <span class="tag teal">Prometheus</span>
+            <span class="tag teal">Grafana</span>
+            <span class="tag teal">Alertmanager</span>
+            <span class="tag teal">SNMP Exporter</span>
+            <span class="tag teal">Blackbox Exporter</span>
+            <span class="tag teal">n8n</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Networking</div>
+          <div class="skill-tags">
+            <span class="tag">MikroTik</span>
+            <span class="tag">Cisco</span>
+            <span class="tag">UniFi</span>
+            <span class="tag">SNMP</span>
+            <span class="tag">VLAN</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Development</div>
+          <div class="skill-tags">
+            <span class="tag teal">Python</span>
+            <span class="tag teal">JavaScript</span>
+            <span class="tag teal">Chrome Extensions</span>
+            <span class="tag teal">MQL5</span>
+            <span class="tag teal">Bash</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">AI & Automation</div>
+          <div class="skill-tags">
+            <span class="tag">Ollama</span>
+            <span class="tag">OpenWebUI</span>
+            <span class="tag">Gemini API</span>
+            <span class="tag">faster-whisper</span>
+            <span class="tag">ComfyUI</span>
+            <span class="tag">ROCm</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Media & Content</div>
+          <div class="skill-tags">
+            <span class="tag">FFmpeg</span>
+            <span class="tag">Edge TTS</span>
+            <span class="tag">yt-dlp</span>
+            <span class="tag">vMix</span>
+            <span class="tag">UGC Automation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    // 1) Replace with your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCkOcCs8BHsPwJEWNygvZnv2Bl7qgUJL0o",
-      authDomain: "tesa-5fb47.firebaseapp.com",
-      projectId: "tesa-5fb47",
-      appId: "1:642215116717:web:12a893e111beb78db42b24",
-    };
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="container">
+      <div class="section-label">// what i've built</div>
+      <h2 class="section-title">Projects</h2>
+      <div class="projects-grid">
 
-    // 2) Init
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    setPersistence(auth, browserLocalPersistence);
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">Printer Toner Monitoring</div>
+            <div class="project-badge">Production</div>
+          </div>
+          <p class="project-desc">
+            Enterprise printer supply monitoring via raw SNMP UDP (zero dependencies).
+            Integrates with existing Prometheus + Grafana stack via SNMP Exporter.
+            Auto-detects mono vs color printers across 20+ devices.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Python</span>
+            <span class="stack-tag">SNMP</span>
+            <span class="stack-tag">Prometheus</span>
+            <span class="stack-tag">Grafana</span>
+          </div>
+        </div>
 
-    // UI helpers
-    const $ = (q) => document.querySelector(q);
-    const show = (id) => $(id).classList.remove('hidden');
-    const hide = (id) => $(id).classList.add('hidden');
-    const setMsg = (el, text, ok=false) => { el.textContent = text; el.className = 'msg ' + (ok? 'ok':'err'); };
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">Self-hosted Monitoring Stack</div>
+            <div class="project-badge">Production</div>
+          </div>
+          <p class="project-desc">
+            Full observability platform on Proxmox LXC via Docker Compose.
+            Monitors Cisco switches, Windows Servers, UniFi APs, CCTV, and UPS.
+            Alert delivery via n8n + Alertmanager with RSS feed integration.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Prometheus</span>
+            <span class="stack-tag">Grafana</span>
+            <span class="stack-tag">Docker</span>
+            <span class="stack-tag">n8n</span>
+            <span class="stack-tag">Proxmox</span>
+          </div>
+        </div>
 
-    // Tabs
-    const tabs = [
-      { tab:'#tab-login', panel:'#panel-login' },
-      { tab:'#tab-signup', panel:'#panel-signup' },
-      { tab:'#tab-forgot', panel:'#panel-forgot' },
-    ];
-    function switchTo(key){
-      tabs.forEach(({tab,panel})=>{
-        const active = tab.includes(key);
-        $(tab).setAttribute('aria-selected', active ? 'true' : 'false');
-        $(panel).classList.toggle('hidden', !active);
-      });
-      hide('#panel-user');
-    }
-    tabs.forEach(({tab})=> $(tab).addEventListener('click', ()=> switchTo(tab.split('-')[1])));
-    document.querySelectorAll('[data-goto]').forEach(btn=> btn.addEventListener('click', ()=> switchTo(btn.dataset.goto)));
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">ytdlp-native Chrome Extension</div>
+            <div class="project-badge">Open Source</div>
+          </div>
+          <p class="project-desc">
+            Browser extension using Python native messaging host to download video streams.
+            Reverse-engineered Majorplay CDN token auth, supports Intel QSV & NVENC
+            hardware encoding, and ported to Linux (Brave/Kali).
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">JavaScript</span>
+            <span class="stack-tag">Python</span>
+            <span class="stack-tag">yt-dlp</span>
+            <span class="stack-tag">FFmpeg</span>
+            <span class="stack-tag">Chrome API</span>
+          </div>
+        </div>
 
-    // Auth state
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Update UI
-        $('#user-name').textContent = user.displayName || 'Logged in';
-        $('#user-email').textContent = user.email || '';
-        $('#verify-wrap').classList.toggle('hidden', !!user.emailVerified === true);
-        hide('#panel-login'); hide('#panel-signup'); hide('#panel-forgot');
-        show('#panel-user');
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">Local AI Stack</div>
+            <div class="project-badge">Homelab</div>
+          </div>
+          <p class="project-desc">
+            Self-hosted AI assistant on AMD RX 9070 using ROCm 7.2.1.
+            Runs Qwen3-27B via Ollama + OpenWebUI with SearXNG web search integration.
+            Batch control script for managing the full stack.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Ollama</span>
+            <span class="stack-tag">OpenWebUI</span>
+            <span class="stack-tag">ROCm</span>
+            <span class="stack-tag">SearXNG</span>
+            <span class="stack-tag">Python</span>
+          </div>
+        </div>
 
-        // Send token to parent (Google Sites) if embedded
-        try {
-          const token = await user.getIdToken();
-          window.parent.postMessage({ type:'FIREBASE_ID_TOKEN', token }, '*');
-        } catch(_) {}
-      } else {
-        show('#panel-login'); hide('#panel-user');
-        switchTo('login');
-      }
-    });
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">UGC Video Pipeline</div>
+            <div class="project-badge">Automation</div>
+          </div>
+          <p class="project-desc">
+            Fully automated UGC content pipeline for DES Sneakers brand.
+            Script-to-video using Gemini API for copywriting, Edge TTS for voiceover,
+            and FFmpeg with AMD GPU encoding for rendering.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Python</span>
+            <span class="stack-tag">Gemini API</span>
+            <span class="stack-tag">Edge TTS</span>
+            <span class="stack-tag">FFmpeg</span>
+            <span class="stack-tag">AMD GPU</span>
+          </div>
+        </div>
 
-    // Handlers: Login
-    $('#form-login').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = $('#login-email').value.trim();
-      const pass  = $('#login-pass').value;
-      const msg = $('#login-msg'); msg.textContent='';
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        setMsg(msg, 'Login successful', true);
-      } catch (err) {
-        setMsg(msg, tidyError(err));
-      }
-    });
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">Whisper Subtitle App</div>
+            <div class="project-badge">Desktop App</div>
+          </div>
+          <p class="project-desc">
+            Python desktop app for auto-generating SRT subtitles from local video files
+            using faster-whisper. Supports CUDA acceleration with CPU fallback,
+            wrapped in a clean tkinter GUI.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Python</span>
+            <span class="stack-tag">faster-whisper</span>
+            <span class="stack-tag">CUDA</span>
+            <span class="stack-tag">tkinter</span>
+          </div>
+        </div>
 
-    // Handlers: Signup
-    $('#form-signup').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const name  = $('#signup-name').value.trim();
-      const email = $('#signup-email').value.trim();
-      const pass  = $('#signup-pass').value;
-      const msg = $('#signup-msg'); msg.textContent='';
-      try {
-        const { user } = await createUserWithEmailAndPassword(auth, email, pass);
-        if (name) await updateProfile(user, { displayName: name });
-        await sendEmailVerification(user);
-        setMsg(msg, 'Account created. Verification email sent.', true);
-      } catch (err) {
-        setMsg(msg, tidyError(err));
-      }
-    });
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">Finance Telegram Bot</div>
+            <div class="project-badge">Side Project</div>
+          </div>
+          <p class="project-desc">
+            Personal finance tracker bot with receipt OCR via Gemini Vision.
+            Built on Cloudflare Workers (serverless) with Google Sheets as the database.
+            Supports photo-based expense logging from Telegram.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">Cloudflare Workers</span>
+            <span class="stack-tag">Gemini Vision</span>
+            <span class="stack-tag">Google Sheets API</span>
+            <span class="stack-tag">Telegram Bot API</span>
+          </div>
+        </div>
 
-    // Handlers: Forgot
-    $('#form-forgot').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = $('#forgot-email').value.trim();
-      const msg = $('#forgot-msg'); msg.textContent='';
-      try {
-        await sendPasswordResetEmail(auth, email);
-        setMsg(msg, 'Reset link sent to your email.', true);
-      } catch (err) {
-        setMsg(msg, tidyError(err));
-      }
-    });
+        <div class="project-card">
+          <div class="project-header">
+            <div class="project-name">MT5 Expert Advisors</div>
+            <div class="project-badge">Trading</div>
+          </div>
+          <p class="project-desc">
+            Multiple algorithmic trading bots for XAUUSD on MetaTrader 5.
+            Strategies include Triple MA + RSI, London Breakout, and scalping,
+            with dynamic lot sizing and live dashboard overlays.
+          </p>
+          <div class="project-stack">
+            <span class="stack-tag">MQL5</span>
+            <span class="stack-tag">MetaTrader 5</span>
+            <span class="stack-tag">XAUUSD</span>
+          </div>
+        </div>
 
-    // Resend verify
-    $('#btn-send-verify').addEventListener('click', async ()=>{
-      const span = $('#verify-msg'); span.textContent='';
-      try {
-        if (auth.currentUser) {
-          await sendEmailVerification(auth.currentUser);
-          setMsg(span, 'Verification email sent.', true);
-        }
-      } catch (err) { setMsg(span, tidyError(err)); }
-    });
+      </div>
+    </div>
+  </section>
 
-    // Copy token
-    $('#btn-copy-token').addEventListener('click', async ()=>{
-      try {
-        const token = await auth.currentUser?.getIdToken();
-        await navigator.clipboard.writeText(token || '');
-        alert('ID token copied to clipboard');
-      } catch(_) { alert('Failed to copy'); }
-    });
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="container">
+      <div class="section-label">// where i've worked</div>
+      <h2 class="section-title">Experience</h2>
 
-    // Sign out
-    $('#btn-signout').addEventListener('click', ()=> signOut(auth));
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-role">IT Support Specialist</div>
+          <div class="exp-period">2020 — Present</div>
+        </div>
+        <div class="exp-company">PT MDTV Media Technologies Tbk · Jakarta Selatan</div>
+        <ul class="exp-bullets">
+          <li>Built and maintain a full Prometheus/Grafana monitoring stack on Proxmox, covering Cisco switches, Windows Servers, UniFi APs, CCTV, and UPS devices across the company.</li>
+          <li>Developed printer toner monitoring system via SNMP for 20+ network printers, integrated into existing observability platform.</li>
+          <li>Administered Active Directory domain (netmedia.co.id) including user provisioning, GPO management, and authentication troubleshooting.</li>
+          <li>Managed MikroTik and Cisco network infrastructure including VLAN configuration, SNMP monitoring, and inter-VLAN routing.</li>
+          <li>Automated IT asset inventory processing for 886+ assets using Python and Excel, generating per-floor summary reports.</li>
+          <li>Set up WireGuard VPN on Oracle Cloud for secure remote access and self-hosted service routing.</li>
+        </ul>
+      </div>
 
-    // Error helper
-    function tidyError(err){
-      const code = err?.code || '';
-      switch(code){
-        case 'auth/invalid-email': return 'Email tidak valid';
-        case 'auth/missing-password': return 'Password wajib diisi';
-        case 'auth/weak-password': return 'Password terlalu lemah (min 6 karakter)';
-        case 'auth/email-already-in-use': return 'Email sudah terdaftar';
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password': return 'Email atau password salah';
-        case 'auth/user-not-found': return 'Akun tidak ditemukan';
-        default: return (err?.message || 'Terjadi kesalahan');
-      }
-    }
-  </script>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-label">// reach out</div>
+      <h2 class="section-title">Contact</h2>
+      <p style="color:#94a3b8; margin-bottom:2rem; max-width:500px; font-size:0.9rem;">
+        Open to new opportunities, collaborations, or just talking about infrastructure and automation.
+      </p>
+      <div class="contact-grid">
+        <a href="https://github.com/aldho21" class="contact-link" target="_blank">
+          <span class="contact-icon">⌥</span> GitHub / aldho21
+        </a>
+        <a href="mailto:aldho@example.com" class="contact-link">
+          <span class="contact-icon">✉</span> Email
+        </a>
+        <a href="https://www.linkedin.com/in/aldho-helsaputra" class="contact-link" target="_blank">
+          <span class="contact-icon">in</span> LinkedIn
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>built by aldho helsaputra · Jakarta, Indonesia · 2026</p>
+  </footer>
+
 </body>
 </html>
